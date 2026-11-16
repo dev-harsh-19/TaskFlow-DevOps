@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard · TaskFlow{% endblock %}
+
+{% block content %}
+<section class="dashboard-heading">
+    <div>
+        <p class="eyebrow">YOUR PERSONAL DASHBOARD</p>
+        <h1>Your day, in flow.</h1>
+        <p class="heading-copy">A clear mind starts with a clear list. What would you like to get done?</p>
+    </div>
+    <a class="btn btn-primary add-task-link" href="#new-task">＋ <span>Add a task</span></a>
+</section>
+
+<section class="stats-grid" aria-label="Task statistics">
+    <article class="stat-card stat-total">
+        <span class="stat-label">Total tasks</span>
+        <strong id="total-count">{{ stats.total }}</strong>
+        <span class="stat-icon" aria-hidden="true">▤</span>
+    </article>
+    <article class="stat-card stat-completed">
+        <span class="stat-label">Completed</span>
+        <strong id="completed-count">{{ stats.completed }}</strong>
+        <span class="stat-icon" aria-hidden="true">✓</span>
+    </article>
+    <article class="stat-card stat-pending">
+        <span class="stat-label">Pending</span>
+        <strong id="pending-count">{{ stats.pending }}</strong>
+        <span class="stat-icon" aria-hidden="true">◷</span>
+    </article>
+</section>
+
+<section class="task-section" aria-labelledby="task-list-heading">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">STAY ON TRACK</p>
+            <h2 id="task-list-heading">Your tasks</h2>
+        </div>
+        <nav class="filter-tabs" aria-label="Filter tasks">
+            {% for value, label in [('all', 'All'), ('pending', 'Pending'), ('completed', 'Completed')] %}
+                <a class="filter-tab {{ 'active' if selected_status == value else '' }}"
+                   href="{{ url_for('index', status=value) }}"
+                   {% if selected_status == value %}aria-current="page"{% endif %}>{{ label }}</a>
+            {% endfor %}
+        </nav>
+    </div>
+
+    {% if tasks %}
+        <div class="task-list">
+            {% for task in tasks %}
+                <article class="task-card {{ 'task-done' if task.status == 'completed' else '' }}">
+                    <div class="task-status-dot {{ 'dot-done' if task.status == 'completed' else '' }}" aria-hidden="true"></div>
+                    <div class="task-content">
+                        <div class="task-title-row">
+                            <h3>{{ task.title }}</h3>
+                            <span class="status-badge {{ 'badge-done' if task.status == 'completed' else 'badge-pending' }}">
+                                {{ 'Completed' if task.status == 'completed' else 'Pending' }}
+                            </span>
+                        </div>
+                        {% if task.description %}
+                            <p class="task-description">{{ task.description }}</p>
+                        {% endif %}
+                        <p class="task-date">Added {{ task.created_at }}</p>
+                    </div>
+                    <div class="task-actions">
+                        <form method="post" action="{{ url_for('toggle_task_status', task_id=task.id) }}">
+                            <button class="btn btn-sm btn-outline-success" type="submit">
+                                {{ 'Mark as pending' if task.status == 'completed' else 'Mark as completed' }}
+                            </button>
+                        </form>
+                        <a class="btn btn-sm btn-light" href="{{ url_for('edit_task', task_id=task.id) }}">Edit</a>
+                        <form method="post" action="{{ url_for('delete_task', task_id=task.id) }}" data-confirm="Delete this task? This action cannot be undone.">
+                            <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+                        </form>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <span class="empty-icon" aria-hidden="true">✦</span>
+            <h3>{% if selected_status == 'all' %}No tasks yet{% else %}Nothing in this view{% endif %}</h3>
+            <p>{% if selected_status == 'all' %}Add your first task and start building momentum.{% else %}Try another filter or add a new task.{% endif %}</p>
+            {% if selected_status == 'all' %}
+                <a class="btn btn-primary" href="#new-task">Create your first task</a>
+            {% endif %}
+        </div>
+    {% endif %}
+</section>
+
+<section class="new-task-card" id="new-task" aria-labelledby="new-task-heading">
+    <div class="new-task-intro">
+        <span class="form-icon" aria-hidden="true">＋</span>
+        <div>
+            <p class="eyebrow">START SOMETHING</p>
+            <h2 id="new-task-heading">Add a new task</h2>
+            <p>Keep it simple. You can add the details now or fill them in later.</p>
+        </div>
+    </div>
+    <form method="post" action="{{ url_for('add_task') }}" class="task-form">
+        <div class="mb-3">
+            <label for="title" class="form-label">Task title <span class="required-mark">*</span></label>
+            <input id="title" name="title" class="form-control" type="text" maxlength="{{ title_max_length }}" placeholder="e.g. Plan the week" required>
+        </div>
+        <div class="mb-3">
+            <label for="description" class="form-label">Description <span class="optional-label">Optional</span></label>
+            <textarea id="description" name="description" class="form-control" rows="3" maxlength="{{ description_max_length }}" placeholder="Add a few details to help you get started"></textarea>
+        </div>
+        <button class="btn btn-primary" type="submit">Add task <span aria-hidden="true">→</span></button>
+    </form>
+</section>
+{% endblock %}

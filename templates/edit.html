@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Edit task · TaskFlow{% endblock %}
+
+{% block content %}
+<section class="edit-page">
+    <a class="back-link" href="{{ url_for('index') }}">← Back to dashboard</a>
+    <div class="new-task-card edit-card">
+        <div class="new-task-intro">
+            <span class="form-icon" aria-hidden="true">✎</span>
+            <div>
+                <p class="eyebrow">MAKE IT YOURS</p>
+                <h1>Edit task</h1>
+                <p>Update the details and keep moving forward.</p>
+            </div>
+        </div>
+        <form method="post" action="{{ url_for('update_task', task_id=task.id) }}" class="task-form">
+            <div class="mb-3">
+                <label for="title" class="form-label">Task title <span class="required-mark">*</span></label>
+                <input id="title" name="title" class="form-control" type="text" maxlength="{{ title_max_length }}" value="{{ task.title }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="description" class="form-label">Description <span class="optional-label">Optional</span></label>
+                <textarea id="description" name="description" class="form-control" rows="4" maxlength="{{ description_max_length }}">{{ task.description }}</textarea>
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-primary" type="submit">Save changes</button>
+                <a class="btn btn-light" href="{{ url_for('index') }}">Cancel</a>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}
